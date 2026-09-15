@@ -10,7 +10,7 @@ export const botConfig = {
     activities: [
       {
         name: "Custom Status",
-        state: "👑 FURY SYSTEME | /help", // ⬅️ التعديل هنا: اسم الحالة الجديد الفخم
+        state: "👑 FURY SYSTEME | /help", // ⬅️ اسم الحالة الجديد
         type: 4,               // Custom Status
       },
     ],
@@ -26,6 +26,20 @@ export const botConfig = {
     testGuildId: process.env.TEST_GUILD_ID,
     maintenanceMode: process.env.MAINTENANCE_MODE === "true",
     prefix: process.env.PREFIX || "!",
+  },
+
+  // =========================
+  // JOIN TO CREATE & HELP PANEL SETTINGS
+  // =========================
+  joinToCreate: {
+    // ضع ID ديال روم "Join to Create" هنا أو اتركه يقرأ من البيئة
+    channelId: process.env.JOIN_TO_CREATE_CHANNEL_ID || "", 
+    defaultName: "{user}'s VC",
+    panel: {
+      title: "One Tap – Help Panel",
+      color: "#D4AF37", // اللون الذهبي الخاص باللوحة
+      footerText: "FURY SYSTEME ✨",
+    }
   },
 
   // =========================
@@ -57,7 +71,7 @@ export const botConfig = {
   embeds: {
     colors: {
       // Main brand colors (Golden FURY Theme).
-      primary: "#D4AF37",    // ⬅️ التعديل هنا: اللون الذهبي الأساسي (Metallic Gold)
+      primary: "#D4AF37",    // ⬅️ اللون الذهبي الأساسي (Metallic Gold)
       secondary: "#FFD700",  // ⬅️ اللون الذهبي الثانوي (Bright Gold)
 
       // Standard status colors for success/error/warning/info messages.
