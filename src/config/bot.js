@@ -10,8 +10,8 @@ export const botConfig = {
     activities: [
       {
         name: "Custom Status",
-        state: "👑 FURY SYSTEME | /help", // ⬅️ اسم الحالة الجديد
-        type: 4,               // Custom Status
+        state: "👑 FURY SYSTEME | /help",
+        type: 4,
       },
     ],
   },
@@ -29,16 +29,41 @@ export const botConfig = {
   },
 
   // =========================
-  // JOIN TO CREATE & HELP PANEL SETTINGS
+  // JOIN TO CREATE & AUTOMATIC INTERFACE PANEL
   // =========================
   joinToCreate: {
-    // ضع ID ديال روم "Join to Create" هنا أو اتركه يقرأ من البيئة
     channelId: process.env.JOIN_TO_CREATE_CHANNEL_ID || "", 
     defaultName: "{user}'s VC",
     panel: {
       title: "One Tap – Help Panel",
-      color: "#D4AF37", // اللون الذهبي الخاص باللوحة
+      color: "#D4AF37",
       footerText: "FURY SYSTEME ✨",
+      // الأوامر النصية كاملة كيفما فـ اللوحة اللي فـ الصورة
+      description: 
+        "Need help managing your voice channel? Use the commands below to customize, control, and secure your VC with ease.\n\n" +
+        "📝 | **name** : changes the name of the vc\n" +
+        "🔒 | **lock/unlock** : locks/unlocks the vc\n" +
+        "ℹ️ | **info/stats** : show information vc\n" +
+        "♾️ | **limit** : sets the limit of the vc\n" +
+        "🔄 | **reset** : reset all permissions channel\n" +
+        "👤+ | **permit** : gives a user permission to join the vc\n" +
+        "👥+ | **permall** : give perm current member your vc\n" +
+        "🎭+ | **rpermit** : gives a join permission to role\n" +
+        "👤- | **reject** : removes a user permission to join the vc\n" +
+        "🔊 | **soundboard** : Toggles Soundboard on/off\n" +
+        "👁️‍🗨️ | **hide/unhide** : unhides/hides the vc\n" +
+        "👑 | **owner** : shows the owner of the vc\n" +
+        "👑 | **transfer** : Transfer Owner Channel\n" +
+        "✋ | **claim** : claims the vc if the old owner is gone\n" +
+        "⏱️ | **slowmode** : changes the vc slowmode\n" +
+        "📡 | **bitrate** : Going above 64 kbps may adversely affect\n" +
+        "📜 | **tmute/tunmute** : Mute/Unmute a user from text your vc\n" +
+        "🗣️ | **status** : Set a status for your voice channel\n" +
+        "🔐 | **tlock/tunlock** : Lock/Unlock text chat in your vc\n" +
+        "🚫 | **bl [add/remove/clear]** : blacklist a specific user from your VC\n" +
+        "⚪ | **wl [add/remove/clear]** : whitelist a specific user to your VC\n" +
+        "👥 | **rwl [add/remove/clear]** : whitelist an entire role to your VC\n" +
+        "⚙️ | **cowner [list/add/remove/clear/permanent]** : assign a manager (co-owner) to your VC"
     }
   },
 
@@ -53,7 +78,7 @@ export const botConfig = {
     ],
 
     statusColors: {
-      pending: "#D4AF37", // ⬅️ ذهبي للحالات المعلقة
+      pending: "#D4AF37",
       approved: "#57F287",
       denied: "#ED4245",
     },
@@ -67,48 +92,36 @@ export const botConfig = {
   // =========================
   // EMBED COLORS & BRANDING
   // =========================
-  // IMPORTANT: This is the SINGLE SOURCE OF TRUTH for all bot colors
   embeds: {
     colors: {
-      // Main brand colors (Golden FURY Theme).
-      primary: "#D4AF37",    // ⬅️ اللون الذهبي الأساسي (Metallic Gold)
-      secondary: "#FFD700",  // ⬅️ اللون الذهبي الثانوي (Bright Gold)
-
-      // Standard status colors for success/error/warning/info messages.
+      primary: "#D4AF37",
+      secondary: "#FFD700",
       success: "#57F287",
       error: "#ED4245",
       warning: "#FEE75C",
-      info: "#D4AF37",       // ⬅️ تحويل لون المعلومات للذهبي
-
-      // Neutral utility colors.
+      info: "#D4AF37",
       light: "#FFFFFF",
       dark: "#202225",
       gray: "#99AAB5",
-
-      // Discord-style palette shortcuts.
       blurple: "#5865F2",
       green: "#57F287",
       yellow: "#FEE75C",
       fuchsia: "#EB459E",
       red: "#ED4245",
       black: "#000000",
-
-      // Feature-specific colors.
       giveaway: {
-        active: "#D4AF37",  // ⬅️ ذهبي
+        active: "#D4AF37",
         ended: "#ED4245",
       },
       ticket: {
-        open: "#D4AF37",    // ⬅️ ذهبي
+        open: "#D4AF37",
         claimed: "#FAA61A",
         closed: "#ED4245",
         pending: "#99AAB5",
       },
-      economy: "#FFD700",    // ⬅️ ذهبي لامع
+      economy: "#FFD700",
       birthday: "#E91E63",
       moderation: "#9B59B6",
-
-      // Ticket priority color mapping.
       priority: {
         none: "#95A5A6",
         low: "#3498db",
@@ -118,7 +131,7 @@ export const botConfig = {
       },
     },
     footer: {
-      text: "FURY SYSTEME ✨", // ⬅️ تعديل اسم البوت في الـ Footer
+      text: "FURY SYSTEME ✨",
       icon: null,
     },
     thumbnail: null,
@@ -171,31 +184,11 @@ export const botConfig = {
     supportRoles: [],
 
     priorities: {
-      none: {
-        emoji: "⚪",
-        color: "#95A5A6",
-        label: "None",
-      },
-      low: {
-        emoji: "🟢",
-        color: "#2ECC71",
-        label: "Low",
-      },
-      medium: {
-        emoji: "🟡",
-        color: "#F1C40F",
-        label: "Medium",
-      },
-      high: {
-        emoji: "🔴",
-        color: "#E74C3C",
-        label: "High",
-      },
-      urgent: {
-        emoji: "🚨",
-        color: "#E91E63",
-        label: "Urgent",
-      },
+      none: { emoji: "⚪", color: "#95A5A6", label: "None" },
+      low: { emoji: "🟢", color: "#2ECC71", label: "Low" },
+      medium: { emoji: "🟡", color: "#F1C40F", label: "Medium" },
+      high: { emoji: "🔴", color: "#E74C3C", label: "High" },
+      urgent: { emoji: "🚨", color: "#E91E63", label: "Urgent" },
     },
 
     defaultPriority: "none",
@@ -263,10 +256,8 @@ export const botConfig = {
   // WELCOME / GOODBYE MESSAGES
   // =========================
   welcome: {
-    defaultWelcomeMessage:
-      "Welcome {user} to {server}! We now have {memberCount} members!",
-    defaultGoodbyeMessage:
-      "{user} has left the server. We now have {memberCount} members.",
+    defaultWelcomeMessage: "Welcome {user} to {server}! We now have {memberCount} members!",
+    defaultGoodbyeMessage: "{user} has left the server. We now have {memberCount} members.",
     defaultWelcomeChannel: null,
     defaultGoodbyeChannel: null,
   },
@@ -299,14 +290,12 @@ export const botConfig = {
       bots: {
         name: "🤖 Bots",
         description: "Total bot accounts in the server",
-        getCount: (guild) =>
-          guild.members.cache.filter((m) => m.user.bot).size.toString(),
+        getCount: (guild) => guild.members.cache.filter((m) => m.user.bot).size.toString(),
       },
       members_only: {
         name: "👤 Humans",
         description: "Total human members (non-bots)",
-        getCount: (guild) =>
-          guild.members.cache.filter((m) => !m.user.bot).size.toString(),
+        getCount: (guild) => guild.members.cache.filter((m) => !m.user.bot).size.toString(),
       },
     },
   },
@@ -318,8 +307,7 @@ export const botConfig = {
     noPermission: "You do not have permission to use this command.",
     cooldownActive: "Please wait {time} before using this command again.",
     errorOccurred: "An error occurred while executing this command.",
-    missingPermissions:
-      "I am missing required permissions to perform this action.",
+    missingPermissions: "I am missing required permissions to perform this action.",
     commandDisabled: "This command has been disabled.",
     maintenanceMode: "The bot is currently in maintenance mode.",
   },
@@ -379,10 +367,10 @@ export function validateConfig(config) {
         errors.push("PostgreSQL connection is required in production (set DATABASE_URL/POSTGRES_URL, or POSTGRES_HOST)");
       }
       if (!process.env.POSTGRES_USER) {
-        errors.push("PostgreSQL user is required in production (set DATABASE_URL/POSTGRES_URL, or POSTGRES_USER)");
+        errors.push("PostgreSQL user is required in production (set DATABASE_URL/POSTGRES_USER)");
       }
       if (!process.env.POSTGRES_PASSWORD) {
-        errors.push("PostgreSQL password is required in production (set DATABASE_URL/POSTGRES_URL, or POSTGRES_PASSWORD)");
+        errors.push("PostgreSQL password is required in production (set DATABASE_URL/POSTGRES_PASSWORD)");
       }
     }
   }
@@ -430,16 +418,11 @@ export function getCommandPrefix() {
 }
 
 export function getBotOwners() {
-  return (botConfig.commands?.owners ?? [])
-    .map((id) => String(id).trim())
-    .filter(Boolean);
+  return (botConfig.commands?.owners ?? []).map((id) => String(id).trim()).filter(Boolean);
 }
 
 export function isBotOwner(userId) {
-  if (!userId) {
-    return false;
-  }
-
+  if (!userId) return false;
   return getBotOwners().includes(String(userId));
 }
 
@@ -449,34 +432,22 @@ export function isMaintenanceMode() {
 
 export function getBotMessage(key, replacements = {}) {
   let message = botConfig.messages?.[key] || key;
-
   for (const [placeholder, value] of Object.entries(replacements)) {
     message = message.replace(new RegExp(`\\{${placeholder}\\}`, "g"), String(value));
   }
-
   return message;
 }
 
 export function isFeatureEnabled(featureKey) {
-  if (!featureKey) {
-    return true;
-  }
-
+  if (!featureKey) return true;
   return botConfig.features?.[featureKey] !== false;
 }
 
 export function isCommandCategoryEnabled(category) {
   const normalized = normalizeCategoryKey(category);
-
-  if (!normalized || normalized === "core") {
-    return true;
-  }
-
+  if (!normalized || normalized === "core") return true;
   const featureKey = COMMAND_CATEGORY_FEATURE_MAP[normalized];
-  if (!featureKey) {
-    return true;
-  }
-
+  if (!featureKey) return true;
   return isFeatureEnabled(featureKey);
 }
 
@@ -497,13 +468,7 @@ export function getColor(path, fallback = "#D4AF37") {
   if (typeof path === "string" && path.startsWith("#")) {
     return parseInt(path.replace("#", ""), 16);
   }
-  const result = path
-    .split(".")
-    .reduce(
-      (obj, key) => (obj && obj[key] !== undefined ? obj[key] : fallback),
-      botConfig.embeds.colors,
-    );
-  
+  const result = path.split(".").reduce((obj, key) => (obj && obj[key] !== undefined ? obj[key] : fallback), botConfig.embeds.colors);
   if (typeof result === "string" && result.startsWith("#")) {
     return parseInt(result.replace("#", ""), 16);
   }
