@@ -32,13 +32,13 @@ export const botConfig = {
   // JOIN TO CREATE & AUTOMATIC INTERFACE PANEL
   // =========================
   joinToCreate: {
-    channelId: process.env.JOIN_TO_CREATE_CHANNEL_ID || "", 
-    defaultName: "{user}'s VC",
+    // ⬅️ تم إدخال الـ ID الخاص بك مباشرة هنا
+    channelId: process.env.JOIN_TO_CREATE_CHANNEL_ID || "1549306130381938738", 
+    defaultName: "{user}s Room",
     panel: {
       title: "One Tap – Help Panel",
       color: "#D4AF37",
       footerText: "FURY SYSTEME ✨",
-      // الأوامر النصية كاملة كيفما فـ اللوحة اللي فـ الصورة
       description: 
         "Need help managing your voice channel? Use the commands below to customize, control, and secure your VC with ease.\n\n" +
         "📝 | **name** : changes the name of the vc\n" +
