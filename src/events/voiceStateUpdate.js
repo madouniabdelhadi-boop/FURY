@@ -1,4 +1,4 @@
-import { ChannelType, PermissionFlagsBits } from 'discord.js';
+import { ChannelType, PermissionFlagsBits, EmbedBuilder } from 'discord.js';
 import {
     getJoinToCreateConfig, 
     registerTemporaryChannel, 
@@ -29,7 +29,6 @@ export async function handleVoiceStateUpdate(oldState, newState, client) {
     const cooldownKey = `\({guildId}-\){userId}`;
     cleanupCooldownEntries();
 
-    // 1. Music Handler Integration
     if (client?.config?.features?.music) {
         handleMusicVoiceState(client, oldState, newState).catch((error) => {
             logger.error('Music voice state handler error:', error);
@@ -43,17 +42,14 @@ export async function handleVoiceStateUpdate(oldState, newState, client) {
             return;
         }
 
-        // Voice Join
         if (!oldState.channel && newState.channel) {
             await handleVoiceJoin(client, newState, config, cooldownKey);
         }
 
-        // Voice Leave
         if (oldState.channel && !newState.channel) {
             await handleVoiceLeave(client, oldState, config);
         }
 
-        // Voice Switch/Move
         if (oldState.channel && newState.channel && oldState.channel.id !== newState.channel.id) {
             await handleVoiceMove(client, oldState, newState, config, cooldownKey);
         }
@@ -63,7 +59,6 @@ export async function handleVoiceStateUpdate(oldState, newState, client) {
     }
 }
 
-// Named export alternative for handler compatibility
 export default {
     name: 'voiceStateUpdate',
     execute: handleVoiceStateUpdate
@@ -220,11 +215,11 @@ async function createTemporaryChannel(client, state, config, cooldownKey) {
             permissionOverwrites: [
                 {
                     id: member.id,
-                    allow: ['Connect', 'Speak', 'PrioritySpeaker', 'MoveMembers']
+                    allow: ['Connect', 'Speak', 'PrioritySpeaker', 'MoveMembers', 'SendMessages']
                 },
                 {
                     id: guild.id,
-                    allow: ['Connect', 'Speak']
+                    allow: ['Connect', 'Speak', 'SendMessages']
                 }
             ]
         });
@@ -233,14 +228,51 @@ async function createTemporaryChannel(client, state, config, cooldownKey) {
 
         if (member.voice?.channel?.id === triggerChannel.id) {
             await member.voice.setChannel(tempChannel);
-        } else {
-            logger.debug(`Skipped moving \({member.id} to temporary channel\){tempChannel.id} because voice state changed`);
         }
 
-        logger.info(`Created temporary voice channel \({tempChannel.name} (\){tempChannel.id}) for user \({member.user.tag} in guild\){guild.name}`);
+        // 🟢 إرسال الـ Embed Panel فـ الشات د الروم الصوتية أوتوماتيكياً
+        try {
+            const panelEmbed = new EmbedBuilder()
+                .setColor(0x2f3136)
+                .setAuthor({ 
+                    name: "One Tap – Help Panel", 
+                    iconURL: client.user.displayAvatarURL({ dynamic: true }) 
+                })
+                .setDescription(
+                    "Need help managing your voice channel? Use the commands below to customize, control, and secure your VC with ease.\n\n" +
+                    "📑 | **name** : changes the name of the vc\n" +
+                    "🔒 | **lock/unlock** : locks/unlocks the vc\n" +
+                    "ℹ️ | **info/stats** : show information vc\n" +
+                    "♾️ | **limit** : sets the limit of the vc\n" +
+                    "🔄 | **reset** : reset all permissions channel\n" +
+                    "👤+ | **permit** : gives a user permission to join the vc\n" +
+                    "👥+ | **permall** : give perm current member your vc\n" +
+                    "👤+ | **rpermit** : gives a join permission to role\n" +
+                    "👤- | **reject** : removes a user permission to join the vc\n" +
+                    "🔊 | **soundboard** : Toggles Soundboard on/off\n" +
+                    "👁️‍🗨️ | **hide/unhide** : unhides/hides the vc\n" +
+                    "👑 | **owner** : shows the owner of the vc\n" +
+                    "👑 | **transfer** : Transfer Owner Channel\n" +
+                    "✋ | **claim** : claims the vc if the old owner is gone\n" +
+                    "⏱️ | **slowmode** : changes the vc slowmode\n" +
+                    "📡 | **bitrate** : Going above 64 kbps may adversely affect\n" +
+                    "📜 | **tmute/tunmute** : Mute/Unmute a user from text your vc\n" +
+                    "🗣️ | **status** : Set a status for your voice channel\n" +
+                    "🔐 | **tlock/tunlock** : Lock/Unlock text chat in your vc\n" +
+                    "🚫 | **bl [add/remove/clear]** : blacklist a specific user\n" +
+                    "⚪ | **wl [add/remove/clear]** : whitelist a specific user\n" +
+                    "⚙️ | **cowner [list/add/remove/clear]** : assign a manager"
+                );
+
+            await tempChannel.send({ embeds: [panelEmbed] });
+        } catch (msgError) {
+            logger.error(`Could not send help panel in voice chat ${tempChannel.id}:`, msgError);
+        }
+
+        logger.info(`Created temporary voice channel \({tempChannel.name} (\){tempChannel.id}) for user ${member.user.tag}`);
 
     } catch (error) {
-        logger.error(`Failed to create temporary channel for user \({member.user.tag} in guild\){guild.name}:`, error);
+        logger.error(`Failed to create temporary channel for user ${member.user.tag}:`, error);
         channelCreationCooldown.delete(cooldownKey);
     }
 }
@@ -249,7 +281,7 @@ async function deleteTemporaryChannel(client, channel, guildId) {
     try {
         await unregisterTemporaryChannel(client, guildId, channel.id);
         await channel.delete('Temporary voice channel - empty');
-        logger.info(`Deleted temporary voice channel \({channel.name} (\){channel.id}) in guild ${channel.guild.name}`);
+        logger.info(`Deleted temporary voice channel \({channel.name} (\){channel.id})`);
     } catch (error) {
         logger.error(`Failed to delete temporary channel ${channel.id}:`, error);
     }
