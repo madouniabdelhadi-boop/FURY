@@ -263,7 +263,7 @@ async function handleConfigSubcommand(interaction, client) {
                     inline: true
                 }
             )
-            .setFooter({ text: 'Use the buttons below to modify settings • Only one trigger channel is supported per guild' })
+            .setFooter({ text: 'Use the buttons below to modify settings' })
             .setTimestamp();
 
         const nameButton = new ButtonBuilder()
@@ -295,14 +295,6 @@ async function handleConfigSubcommand(interaction, client) {
 
         const message = await interaction.fetchReply();
 
-        if (!message || typeof message.createMessageComponentCollector !== 'function') {
-            throw new TitanBotError(
-                'Failed to fetch interaction reply for collector setup',
-                ErrorTypes.DISCORD_API,
-                'Failed to open configuration controls. Please run `/jointocreate dashboard` again.'
-            );
-        }
-
         const collector = message.createMessageComponentCollector({
             componentType: ComponentType.Button,
             time: 300000
@@ -327,23 +319,21 @@ async function handleConfigSubcommand(interaction, client) {
                 } else if (customId.includes('jtc_config_bitrate_')) {
                     await handleBitrateModal(buttonInteraction, triggerChannel, currentConfig, client);
                 } else if (customId.includes('jtc_config_delete_')) {
-                    await handleChannelDeletion(buttonInteraction, triggerChannel, currentConfig, client);
+                    await handleChannelDeletion(buttonInteraction, triggerChannel, client);
                 }
             } catch (error) {
                 const userMessage = error instanceof TitanBotError
                     ? error.userMessage || 'An error occurred.'
                     : 'An error occurred while processing your request.';
 
-                if (error instanceof TitanBotError) {
-                    logger.debug(`Button interaction validation error: ${error.message}`, error.context || {});
-                } else {
-                    logger.error('Unexpected error in config button interaction:', error);
-                }
+                logger.error('Unexpected error in config button interaction:', error);
 
-                await buttonInteraction.reply({
-                    content: `❌ ${userMessage}`,
-                    flags: MessageFlags.Ephemeral
-                }).catch(() => {});
+                if (!buttonInteraction.replied && !buttonInteraction.deferred) {
+                    await buttonInteraction.reply({
+                        content: `❌ ${userMessage}`,
+                        flags: MessageFlags.Ephemeral
+                    }).catch(() => {});
+                }
             }
         });
 
@@ -385,13 +375,13 @@ async function handleNameTemplateModal(interaction, triggerChannel, currentConfi
             .addComponents(
                 new ActionRowBuilder().addComponents(
                     new TextInputBuilder()
-                        .setCustomId('name_template')
-                        .setLabel('Name Template (e.g., {username}\'s Room)')
-                        .setPlaceholder('{username}\'s Room, {displayName}\'s Space, etc.')
+                        .setCustomId('template_input')
+                        .setLabel('Name Template ({username}, {displayName})')
                         .setStyle(TextInputStyle.Short)
-                        .setRequired(true)
-                        .setMaxLength(100)
+                        .setPlaceholder("e.g. {username}'s Room")
                         .setValue(currentTemplate)
+                        .setRequired(true)
+                        .setMaxLength(32)
                 )
             );
 
@@ -410,7 +400,7 @@ async function handleNameTemplateModal(interaction, triggerChannel, currentConfi
             return;
         }
 
-        const newTemplate = modalSubmission.fields.getTextInputValue('name_template').trim();
+        const newTemplate = modalSubmission.fields.getTextInputValue('template_input').trim();
 
         await updateChannelConfig(client, interaction.guild.id, triggerChannel.id, {
             nameTemplate: newTemplate
@@ -427,12 +417,9 @@ async function handleNameTemplateModal(interaction, triggerChannel, currentConfi
         });
 
     } catch (error) {
-        if (error.code === 'INTERACTION_COLLECTOR_ERROR') {
-            return;
-        }
-        if (error instanceof TitanBotError) {
-            throw error;
-        }
+        if (error.code === 'INTERACTION_COLLECTOR_ERROR') return;
+        if (error instanceof TitanBotError) throw error;
+
         logger.error('Unexpected error in name template modal:', error);
         throw new TitanBotError(
             `Modal error: ${error.message}`,
@@ -478,16 +465,8 @@ async function handleUserLimitModal(interaction, triggerChannel, currentConfig, 
             return;
         }
 
-        const userInput = modalSubmission.fields.getTextInputValue('user_limit').trim();
-        const parsedLimit = parseInt(userInput, 10);
-
-        if (isNaN(parsedLimit) || parsedLimit < 0 || parsedLimit > 99) {
-            await modalSubmission.reply({
-                content: '❌ Invalid user limit. Please specify a number between 0 and 99.',
-                flags: MessageFlags.Ephemeral
-            });
-            return;
-        }
+        const userInput = parseInt(modalSubmission.fields.getTextInputValue('user_limit').trim(), 10);
+        const parsedLimit = isNaN(userInput) || userInput < 0 ? 0 : Math.min(userInput, 99);
 
         await updateChannelConfig(client, interaction.guild.id, triggerChannel.id, {
             userLimit: parsedLimit
@@ -504,12 +483,9 @@ async function handleUserLimitModal(interaction, triggerChannel, currentConfig, 
         });
 
     } catch (error) {
-        if (error.code === 'INTERACTION_COLLECTOR_ERROR') {
-            return;
-        }
-        if (error instanceof TitanBotError) {
-            throw error;
-        }
+        if (error.code === 'INTERACTION_COLLECTOR_ERROR') return;
+        if (error instanceof TitanBotError) throw error;
+
         logger.error('Unexpected error in user limit modal:', error);
         throw new TitanBotError(
             `Modal error: ${error.message}`,
@@ -555,16 +531,8 @@ async function handleBitrateModal(interaction, triggerChannel, currentConfig, cl
             return;
         }
 
-        const userInput = modalSubmission.fields.getTextInputValue('bitrate').trim();
-        const parsedBitrate = parseInt(userInput, 10);
-
-        if (isNaN(parsedBitrate) || parsedBitrate < 8 || parsedBitrate > 384) {
-            await modalSubmission.reply({
-                content: '❌ Invalid bitrate value. Please specify a bitrate between 8 and 384 kbps.',
-                flags: MessageFlags.Ephemeral
-            });
-            return;
-        }
+        const userInput = parseInt(modalSubmission.fields.getTextInputValue('bitrate').trim(), 10);
+        const parsedBitrate = isNaN(userInput) || userInput < 8 ? 64 : Math.min(userInput, 384);
 
         await updateChannelConfig(client, interaction.guild.id, triggerChannel.id, {
             bitrate: parsedBitrate * 1000
@@ -581,12 +549,9 @@ async function handleBitrateModal(interaction, triggerChannel, currentConfig, cl
         });
 
     } catch (error) {
-        if (error.code === 'INTERACTION_COLLECTOR_ERROR') {
-            return;
-        }
-        if (error instanceof TitanBotError) {
-            throw error;
-        }
+        if (error.code === 'INTERACTION_COLLECTOR_ERROR') return;
+        if (error instanceof TitanBotError) throw error;
+
         logger.error('Unexpected error in bitrate modal:', error);
         throw new TitanBotError(
             `Modal error: ${error.message}`,
@@ -596,7 +561,7 @@ async function handleBitrateModal(interaction, triggerChannel, currentConfig, cl
     }
 }
 
-async function handleChannelDeletion(interaction, triggerChannel, currentConfig, client) {
+async function handleChannelDeletion(interaction, triggerChannel, client) {
     try {
         const confirmRow = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
@@ -609,19 +574,19 @@ async function handleChannelDeletion(interaction, triggerChannel, currentConfig,
                 .setStyle(ButtonStyle.Secondary)
         );
 
-        await InteractionHelper.safeReply(interaction, {
+        const replyMessage = await interaction.reply({
             embeds: [warningEmbed('Confirm Deletion', `Are you sure you want to remove **${triggerChannel.name}** from the Join to Create system?\n\nThis action cannot be undone.`)],
             components: [confirmRow],
-            flags: MessageFlags.Ephemeral
+            flags: MessageFlags.Ephemeral,
+            fetchReply: true
         });
 
-        const message = await interaction.fetchReply();
-        const deleteCollector = message.createMessageComponentCollector({
+        const deleteCollector = replyMessage.createMessageComponentCollector({
             componentType: ComponentType.Button,
             filter: (i) => i.user.id === interaction.user.id && 
                           (i.customId === `jtc_delete_confirm_${triggerChannel.id}` || 
                            i.customId === `jtc_delete_cancel_${triggerChannel.id}`),
-            time: 600_000,
+            time: 60000,
             max: 1
         });
 
@@ -664,23 +629,11 @@ async function handleChannelDeletion(interaction, triggerChannel, currentConfig,
                 }
             } catch (collectError) {
                 logger.error('Error handling delete confirmation:', collectError);
-                await buttonInteraction.reply({
-                    content: '❌ An error occurred while processing your request.',
-                    flags: MessageFlags.Ephemeral
-                }).catch(() => {});
-            }
-        });
-
-        deleteCollector.on('end', (collected, reason) => {
-            if (reason === 'time' && collected.size === 0) {
-                message.edit({ components: [] }).catch(() => {});
             }
         });
 
     } catch (error) {
-        if (error instanceof TitanBotError) {
-            throw error;
-        }
+        if (error instanceof TitanBotError) throw error;
         logger.error('Unexpected error in handleChannelDeletion:', error);
         throw new TitanBotError(
             `Deletion error: ${error.message}`,
